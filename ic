@@ -1,0 +1,92 @@
+import arcade
+import random
+
+class sprite(arcade.Window):
+    def __init__(self, larghezza, altezza, titolo):
+        super().__init__(larghezza, altezza, titolo)
+        self.sprite = None
+        self.cookie = None
+        self.lista_sprite = arcade.SpriteList()
+        
+        self.up_pressed = False
+        self.down_pressed = False
+        self.left_pressed = False
+        self.right_pressed = False
+        
+        self.velocita = 4
+        
+        self.setup()
+    
+    def setup(self):
+        self.sprite = arcade.Sprite("./assets/sprite.png")
+        self.sprite.center_x = 300
+        self.sprite.center_y = 100
+        self.sprite.scale = 0.2
+        self.lista_sprite.append(self.sprite)
+    
+    def on_draw(self):
+        self.clear()
+        self.lista_sprite.draw()
+    
+    def on_update(self, delta_time):
+        # Calcola movimento in base ai tasti premuti
+        change_x = 0
+        change_y = 0
+        
+        if self.up_pressed:
+            change_y += self.velocita
+        if self.down_pressed:
+            change_y -= self.velocita
+        if self.left_pressed:
+            change_x -= self.velocita
+        if self.right_pressed:
+            change_x += self.velocita
+        
+        # Applica movimento
+        self.sprite.center_x += change_x
+        self.sprite.center_y += change_y
+        
+        # Flip orizzontale in base alla direzione
+        if change_x < 0: 
+            self.sprite.scale = (-0.2, 0.2)
+        elif change_x > 0:
+            self.sprite.scale = (0.2 ,0.2)
+        
+        # Limita movimento dentro lo schermo
+        if self.sprite.center_x < 0:
+            self.sprite.center_x = 0
+        elif self.sprite.center_x > self.width:
+            self.sprite.center_x = self.width
+        
+        if self.sprite.center_y < 0:
+            self.sprite.center_y = 0
+        elif self.sprite.center_y > self.height:
+            self.sprite.center_y = self.height
+    
+    def on_key_press(self, tasto, modificatori):
+        if tasto in (arcade.key.UP, arcade.key.W):
+            self.up_pressed = True
+        elif tasto in (arcade.key.DOWN, arcade.key.S):
+            self.down_pressed = True
+        elif tasto in (arcade.key.LEFT, arcade.key.A):
+            self.left_pressed = True
+        elif tasto in (arcade.key.RIGHT, arcade.key.D):
+            self.right_pressed = True
+    
+    def on_key_release(self, tasto, modificatori):
+        """Gestisce il rilascio dei tasti"""
+        if tasto in (arcade.key.UP, arcade.key.W):
+            self.up_pressed = False
+        elif tasto in (arcade.key.DOWN, arcade.key.S):
+            self.down_pressed = False
+        elif tasto in (arcade.key.LEFT, arcade.key.A):
+            self.left_pressed = False
+        elif tasto in (arcade.key.RIGHT, arcade.key.D):
+            self.right_pressed = False
+
+def main():
+    gioco = sprite(600, 600, "Gioco")
+    arcade.run()
+
+if __name__ == "__main__":
+    main()
