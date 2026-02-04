@@ -4,11 +4,14 @@ import random
 class Gioco(arcade.Window):
     def __init__(self, larghezza, altezza, titolo):
         super().__init__(larghezza, altezza, titolo)
+
         self.sprite = None
         self.caramella = None
         self.lista_sprite = arcade.SpriteList()
         self.lista_caramella = arcade.SpriteList()
         self.suono_mangia = arcade.load_sound("./assets/mangia.mp3")
+
+        self.sfondo = None  # Sfondo
         
         self.up_pressed = False
         self.down_pressed = False
@@ -16,11 +19,15 @@ class Gioco(arcade.Window):
         self.right_pressed = False
         
         self.velocita = 4
-        arcade.set_background_color(arcade.color.WHITE)
         
         self.setup()
     
     def setup(self):
+        # Carico lo sfondo
+        self.sfondo = arcade.Sprite("./assets/sfondo.png")
+        self.sfondo.center_x = self.width // 2
+        self.sfondo.center_y = self.height // 2
+
         self.sprite = arcade.Sprite("./assets/sprite.png")
         self.sprite.center_x = 300
         self.sprite.center_y = 100
@@ -38,11 +45,18 @@ class Gioco(arcade.Window):
     
     def on_draw(self):
         self.clear()
+
+        # Disegno lo sfondo correttamente
+        self.sfondo.center_x = self.width // 2
+        self.sfondo.center_y = self.height // 2
+        self.sfondo.width = self.width
+        self.sfondo.height = self.height
+        self.sfondo.draw()
+
         self.lista_caramella.draw()
         self.lista_sprite.draw()
     
     def on_update(self, delta_time):
-        # Calcola movimento in base ai tasti premuti
         change_x = 0
         change_y = 0
         
@@ -55,17 +69,14 @@ class Gioco(arcade.Window):
         if self.right_pressed:
             change_x += self.velocita
         
-        # Applica movimento
         self.sprite.center_x += change_x
         self.sprite.center_y += change_y
         
-        # Flip orizzontale in base alla direzione
         if change_x < 0: 
             self.sprite.scale = (0.3, 0.3)
         elif change_x > 0:
             self.sprite.scale = (-0.3, 0.3)
         
-        # Limita movimento dentro lo schermo
         if self.sprite.center_x < 0:
             self.sprite.center_x = 0
         elif self.sprite.center_x > self.width:
@@ -76,7 +87,6 @@ class Gioco(arcade.Window):
         elif self.sprite.center_y > self.height:
             self.sprite.center_y = self.height
         
-        # Gestione collisioni
         collisioni = arcade.check_for_collision_with_list(self.sprite, self.lista_caramella)
         
         if len(collisioni) > 0:
