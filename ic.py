@@ -1,12 +1,14 @@
 import arcade
 import random
 
-class sprite(arcade.Window):
+class Gioco(arcade.Window):
     def __init__(self, larghezza, altezza, titolo):
         super().__init__(larghezza, altezza, titolo)
         self.sprite = None
-        self.cookie = None
+        self.caramella = None
         self.lista_sprite = arcade.SpriteList()
+        self.lista_caramella = arcade.SpriteList()
+        self.suono_mangia = arcade.load_sound("./assets/mangia.mp3")
         
         self.up_pressed = False
         self.down_pressed = False
@@ -14,6 +16,7 @@ class sprite(arcade.Window):
         self.right_pressed = False
         
         self.velocita = 4
+        arcade.set_background_color(arcade.color.WHITE)
         
         self.setup()
     
@@ -21,11 +24,21 @@ class sprite(arcade.Window):
         self.sprite = arcade.Sprite("./assets/sprite.png")
         self.sprite.center_x = 300
         self.sprite.center_y = 100
-        self.sprite.scale = 0.2
+        self.sprite.scale = 0.3
         self.lista_sprite.append(self.sprite)
+        
+        self.crea_caramella()
+    
+    def crea_caramella(self):
+        self.caramella = arcade.Sprite("./assets/caramella.png")
+        self.caramella.center_x = random.randint(50, 550)
+        self.caramella.center_y = random.randint(50, 550)
+        self.caramella.scale = 0.1
+        self.lista_caramella.append(self.caramella)
     
     def on_draw(self):
         self.clear()
+        self.lista_caramella.draw()
         self.lista_sprite.draw()
     
     def on_update(self, delta_time):
@@ -48,9 +61,9 @@ class sprite(arcade.Window):
         
         # Flip orizzontale in base alla direzione
         if change_x < 0: 
-            self.sprite.scale = (-0.2, 0.2)
+            self.sprite.scale = (0.3, 0.3)
         elif change_x > 0:
-            self.sprite.scale = (0.2 ,0.2)
+            self.sprite.scale = (-0.3, 0.3)
         
         # Limita movimento dentro lo schermo
         if self.sprite.center_x < 0:
@@ -62,6 +75,15 @@ class sprite(arcade.Window):
             self.sprite.center_y = 0
         elif self.sprite.center_y > self.height:
             self.sprite.center_y = self.height
+        
+        # Gestione collisioni
+        collisioni = arcade.check_for_collision_with_list(self.sprite, self.lista_caramella)
+        
+        if len(collisioni) > 0:
+            arcade.play_sound(self.suono_mangia)
+            for caramella in collisioni:
+                caramella.remove_from_sprite_lists()
+            self.crea_caramella()
     
     def on_key_press(self, tasto, modificatori):
         if tasto in (arcade.key.UP, arcade.key.W):
@@ -74,7 +96,6 @@ class sprite(arcade.Window):
             self.right_pressed = True
     
     def on_key_release(self, tasto, modificatori):
-        """Gestisce il rilascio dei tasti"""
         if tasto in (arcade.key.UP, arcade.key.W):
             self.up_pressed = False
         elif tasto in (arcade.key.DOWN, arcade.key.S):
@@ -85,7 +106,7 @@ class sprite(arcade.Window):
             self.right_pressed = False
 
 def main():
-    gioco = sprite(600, 600, "Gioco")
+    gioco = Gioco(1000, 600, "Gioco")
     arcade.run()
 
 if __name__ == "__main__":
